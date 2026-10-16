@@ -311,7 +311,7 @@ function genLevel(n){
   const A={x0:x+130,x1:x+1130,gy:h};
   L.arena=A;
   L.walls=[{x:A.x0-34,y:h-900,w:34,h:900,active:false,wall:true},{x:A.x1,y:h-900,w:34,h:900,active:true,wall:true}];
-  L.goal={x:A.x1-120,y:h};
+  L.goal={x:A.x1-215,y:h};
   L.deathY=Math.max(...L.solids.map(s=>s.y))+520;
   return L;
 }
@@ -1199,32 +1199,90 @@ function drawCp(c){
   }
 }
 function drawGoal(G){
-  const x=G.x, y=G.y+(1-goalRise)*300, th=240, bw=110;
+  // meta: setup gamer de última generación
+  const x=G.x, y=G.y+(1-goalRise)*300;
+  const hue=o=>`hsl(${(time*70+o)%360},100%,62%)`;
+  const rr=(X,Y,w,h,r)=>{ctx.beginPath();if(ctx.roundRect)ctx.roundRect(X,Y,w,h,r);else ctx.rect(X,Y,w,h)};
   ctx.save();
-  ctx.fillStyle='#3a3d48'; ctx.fillRect(x-80,y-34,160,34);
-  ctx.fillStyle=P.hazard; for(let i=-80;i<80;i+=20)ctx.fillRect(x+i,y-34,10,5);
-  ctx.strokeStyle='#c9ccd6'; ctx.lineWidth=4;
-  ctx.beginPath(); ctx.moveTo(x-bw/2,y-34); ctx.lineTo(x-10,y-34-th); ctx.moveTo(x+bw/2,y-34); ctx.lineTo(x+10,y-34-th); ctx.stroke();
-  ctx.lineWidth=2; ctx.strokeStyle='#9da1ad'; ctx.beginPath();
-  for(let k=0;k<9;k++){const y1=y-34-th*k/9,y2=y-34-th*(k+1)/9,w1=bw/2-(bw/2-10)*k/9,w2=bw/2-(bw/2-10)*(k+1)/9;
-    ctx.moveTo(x-w1,y1);ctx.lineTo(x+w2,y2);ctx.moveTo(x+w1,y1);ctx.lineTo(x-w2,y2);ctx.moveTo(x-w2,y2);ctx.lineTo(x+w2,y2)}
-  ctx.stroke();
-  ctx.fillStyle='#5a5e6b'; ctx.fillRect(x-18,y-34-th-12,36,14);
+  // halo RGB detrás
   ctx.globalCompositeOperation='lighter';
-  const gl=ctx.createRadialGradient(x,y-34-th-6,0,x,y-34-th-6,50+Math.sin(time*4)*6); gl.addColorStop(0,'rgba(255,80,80,.7)'); gl.addColorStop(1,'rgba(255,80,80,0)');
-  ctx.fillStyle=gl; ctx.fillRect(x-60,y-34-th-66,120,120);
+  const ha=ctx.createRadialGradient(x,y-120,0,x,y-120,190); ha.addColorStop(0,`hsla(${(time*70)%360},100%,60%,.35)`); ha.addColorStop(1,'hsla(0,0%,0%,0)');
+  ctx.fillStyle=ha; ctx.fillRect(x-190,y-310,380,380);
   ctx.globalCompositeOperation='source-over';
-  const wv=Math.sin(time*3)*3;
-  ctx.fillStyle='#2e3038'; ctx.fillRect(x-3,y-34-150,6,40);
-  ctx.fillStyle=P.pink; ctx.beginPath(); ctx.moveTo(x-46,y-34-178); ctx.lineTo(x+46,y-34-178+wv); ctx.lineTo(x+46,y-34-148+wv); ctx.lineTo(x-46,y-34-148); ctx.closePath(); ctx.fill();
-  ctx.fillStyle='#fff'; ctx.font='20px Bungee, Impact, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('META',x,y-34-162+wv/2);
-  ctx.globalCompositeOperation='lighter';
-  const g2=ctx.createRadialGradient(x,y-60,0,x,y-60,130); g2.addColorStop(0,'rgba(255,110,180,.28)'); g2.addColorStop(1,'rgba(255,110,180,0)');
-  ctx.fillStyle=g2; ctx.fillRect(x-130,y-190,260,260);
+  // alfombra
+  ctx.fillStyle='#2a1838'; ctx.beginPath(); ctx.ellipse(x,y-2,150,9,0,0,7); ctx.fill();
+  ctx.strokeStyle=hue(180); ctx.lineWidth=1.5; ctx.beginPath(); ctx.ellipse(x,y-2,146,7,0,0,7); ctx.stroke();
+  // cartel de neón META
+  const fl=Math.sin(time*23)>-.92?1:.35;
+  ctx.save(); ctx.globalAlpha=fl;
+  ctx.font='30px Bungee, Impact, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.shadowColor='#ff5fa2'; ctx.shadowBlur=18; ctx.lineWidth=3; ctx.strokeStyle='#ff5fa2'; ctx.strokeText('META',x,y-232);
+  ctx.shadowBlur=8; ctx.fillStyle='#ffd6ea'; ctx.fillText('META',x,y-232);
+  ctx.restore();
+  // monitores (tres, los laterales en ángulo)
+  const scr=(X,Y,w,h,k)=>{
+    const g=ctx.createLinearGradient(X,Y,X+w,Y+h); g.addColorStop(0,'#1b2a6b'); g.addColorStop(.5,'#5a2a8a'); g.addColorStop(1,'#ff5fa2');
+    ctx.fillStyle=g; ctx.fillRect(X,Y,w,h);
+    ctx.fillStyle='rgba(255,255,255,.12)'; for(let i=0;i<4;i++){const bx=X+((time*40*(k+1)+i*w/4)%w);ctx.fillRect(bx,Y+h*.62,w/10,h*.38)}
+    ctx.fillStyle='#ffd54a'; ctx.beginPath(); ctx.arc(X+w*.75,Y+h*.3,h*.12,0,7); ctx.fill();
+  };
+  ctx.fillStyle='#16141c';
+  // izquierdo
+  ctx.beginPath(); ctx.moveTo(x-128,y-146); ctx.lineTo(x-50,y-154); ctx.lineTo(x-50,y-100); ctx.lineTo(x-128,y-106); ctx.closePath(); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.moveTo(x-124,y-143); ctx.lineTo(x-54,y-150); ctx.lineTo(x-54,y-104); ctx.lineTo(x-124,y-109); ctx.closePath(); ctx.clip(); scr(x-124,y-150,70,46,1); ctx.restore();
+  // derecho
+  ctx.fillStyle='#16141c'; ctx.beginPath(); ctx.moveTo(x+50,y-154); ctx.lineTo(x+128,y-146); ctx.lineTo(x+128,y-106); ctx.lineTo(x+50,y-100); ctx.closePath(); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.moveTo(x+54,y-150); ctx.lineTo(x+124,y-143); ctx.lineTo(x+124,y-109); ctx.lineTo(x+54,y-104); ctx.closePath(); ctx.clip(); scr(x+54,y-150,70,46,2); ctx.restore();
+  // central curvo
+  ctx.fillStyle='#16141c'; rr(x-52,y-162,104,64,4); ctx.fill();
+  scr(x-48,y-158,96,56,0);
+  ctx.fillStyle='#fff'; ctx.font='16px Bungee, Impact, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('GG',x,y-134);
+  ctx.fillStyle=hue(0); ctx.fillRect(x-52,y-99,104,2);
+  // soportes
+  ctx.fillStyle='#2a2832'; ctx.fillRect(x-4,y-98,8,16); ctx.fillRect(x-20,y-84,40,4);
+  ctx.fillRect(x-92,y-104,6,22); ctx.fillRect(x+86,y-104,6,22);
+  // auriculares colgando del monitor derecho
+  ctx.strokeStyle='#22202a'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(x+128,y-130,10,Math.PI*1.05,Math.PI*1.95); ctx.stroke();
+  ctx.fillStyle='#22202a'; rr(x+117,y-130,7,13,3); ctx.fill(); rr(x+132,y-130,7,13,3); ctx.fill();
+  ctx.fillStyle=hue(90); ctx.fillRect(x+119,y-126,3,5); ctx.fillRect(x+134,y-126,3,5);
+  // escritorio con tira LED
+  ctx.fillStyle='#1d1b24'; rr(x-140,y-82,280,9,3); ctx.fill();
+  ctx.fillStyle='#2c2a36'; ctx.fillRect(x-140,y-82,280,2);
+  for(let i=0;i<28;i++){ctx.fillStyle=hue(i*13);ctx.fillRect(x-140+i*10,y-73,10,2)}
+  ctx.fillStyle='#16141c'; ctx.fillRect(x-132,y-73,8,73); ctx.fillRect(x+124,y-73,8,73);
+  // teclado y mouse RGB
+  ctx.fillStyle='#111018'; rr(x-38,y-88,76,6,2); ctx.fill();
+  for(let i=0;i<12;i++){ctx.fillStyle=hue(i*25);ctx.fillRect(x-35+i*6,y-87,4,1.8)}
+  ctx.fillStyle='#111018'; ctx.beginPath(); ctx.ellipse(x+52,y-85,6,3.6,0,0,7); ctx.fill();
+  ctx.fillStyle=hue(200); ctx.fillRect(x+51,y-87,2,2);
+  // gabinete con vidrio y coolers RGB
+  ctx.fillStyle='#16141c'; rr(x+146,y-128,50,128,4); ctx.fill();
+  ctx.fillStyle='rgba(120,140,200,.12)'; ctx.fillRect(x+150,y-124,42,120);
+  for(let k=0;k<3;k++){
+    const fx=x+171, fy=y-104+k*38, col=hue(k*60);
+    ctx.save(); ctx.globalCompositeOperation='lighter';
+    const gl=ctx.createRadialGradient(fx,fy,0,fx,fy,22); gl.addColorStop(0,col); gl.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.globalAlpha=.45; ctx.fillStyle=gl; ctx.fillRect(fx-22,fy-22,44,44); ctx.restore();
+    ctx.strokeStyle=col; ctx.lineWidth=2.4; ctx.beginPath(); ctx.arc(fx,fy,13,0,7); ctx.stroke();
+    ctx.fillStyle='rgba(30,30,40,.85)';
+    for(let b=0;b<5;b++){const a=time*14+b*Math.PI*2/5;ctx.beginPath();ctx.ellipse(fx+Math.cos(a)*6,fy+Math.sin(a)*6,6,2.6,a,0,7);ctx.fill()}
+    ctx.fillStyle=col; ctx.beginPath(); ctx.arc(fx,fy,2.5,0,7); ctx.fill();
+  }
+  ctx.fillStyle=hue(300); ctx.fillRect(x+146,y-128,50,2);
+  // silla gamer rosa y negra
+  const cx2=x-60;
+  ctx.fillStyle='#14121a'; ctx.fillRect(cx2-3,y-34,6,26);
+  ctx.strokeStyle='#14121a'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(cx2-20,y-4); ctx.lineTo(cx2+20,y-4); ctx.moveTo(cx2,y-8); ctx.lineTo(cx2-14,y-1); ctx.moveTo(cx2,y-8); ctx.lineTo(cx2+14,y-1); ctx.stroke();
+  ctx.fillStyle='#14121a'; for(const wx of[-20,-14,14,20]){ctx.beginPath();ctx.arc(cx2+wx,y-2,2.4,0,7);ctx.fill()}
+  ctx.fillStyle='#1d1b24'; rr(cx2-24,y-44,48,11,4); ctx.fill();
+  ctx.fillStyle='#ff5fa2'; rr(cx2-20,y-46,40,5,2); ctx.fill();
+  ctx.fillStyle='#1d1b24'; ctx.beginPath(); ctx.moveTo(cx2-22,y-44); ctx.lineTo(cx2-26,y-118); ctx.quadraticCurveTo(cx2,y-132,cx2+26,y-118); ctx.lineTo(cx2+22,y-44); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#ff5fa2'; ctx.beginPath(); ctx.moveTo(cx2-8,y-48); ctx.lineTo(cx2-10,y-116); ctx.quadraticCurveTo(cx2,y-121,cx2+10,y-116); ctx.lineTo(cx2+8,y-48); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#1d1b24'; rr(cx2-9,y-112,18,10,3); ctx.fill();
+  ctx.fillStyle='#ffd6ea'; ctx.fillRect(cx2-5,y-108,10,2);
+  ctx.fillStyle='#2a2832'; ctx.fillRect(cx2-28,y-62,6,4); ctx.fillRect(cx2+22,y-62,6,4); ctx.fillRect(cx2-26,y-62,3,16); ctx.fillRect(cx2+23,y-62,3,16);
   ctx.restore();
 }
-
 /* personas: Leito y Camí comparten cuerpo */
 function personBody(o){
   const {run,air,flare,dress}=o;
