@@ -119,7 +119,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
       <div class="stat">
         <div class="hearts" id="hearts"></div>
         <span class="sep"></span>
-        <div class="gems"><svg viewBox="0 0 22 20"><rect x="5" y="1" width="12" height="4" rx="1" fill="#d63d82"/><path d="M5 5h12l4 12q-10 4-20 0z" fill="#ff7ab6"/><path d="M9 5l-2 13M13 5l2 13M11 5v14" stroke="#d63d82" stroke-width="1.2"/></svg><span id="gemCount">0</span></div>
+        <div class="gems"><svg viewBox="0 0 20 22"><rect x="3" y="1" width="14" height="4" rx="1" fill="#3a2414"/><rect x="8.5" y="1.2" width="3" height="3.4" fill="#e8c25a"/><path d="M3 5h14l1.2 16h-6.4L10 11l-1.8 10H1.8z" fill="#5b8bd6"/><path d="M10 5v6" stroke="#24427a" stroke-width="1.2"/></svg><span id="gemCount">0</span></div>
         <span class="sep"></span>
         <span class="lvl" id="lvlName">Nivel 1</span>
       </div>
@@ -147,12 +147,12 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
     <div class="card">
       <div class="portraits"><img class="portrait" id="portrait" alt="Leito"><img class="portrait cami" id="portraitCami" alt="Cami"></div>
       <h1 class="logo">Leito<span>en Vaca Muerta</span></h1>
-      <p class="lede">Cuatro niveles en el yacimiento y un jefe al final de cada uno. Juntá polleras rosa, cuidalas de los golpes y buscá la pollera dorada para volverte gigante.</p>
+      <p class="lede">Cuatro niveles en el yacimiento y un jefe al final de cada uno. Juntá pantalones, cuidalos de los golpes y buscá el pantalón dorado para volverte gigante.</p>
       <div class="btns"><button class="btn" id="playBtn">Jugar</button></div>
       <div class="chips" id="chips"></div>
       <div class="keys"><kbd>←</kbd> <kbd>→</kbd> moverse · <kbd>Espacio</kbd> saltar (dos veces en el aire) · <kbd>P</kbd> pausa</div>
       <div class="rotate">Se juega mejor con el teléfono en horizontal.</div>
-      <div class="credits">Un juego de Franco y Leito · v1.3 (setup gamer)</div>
+      <div class="credits">Un juego de Franco y Gustavo · v1.4</div>
     </div>
   </div>
 
@@ -173,7 +173,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
       <span class="eyebrow" id="clearEyebrow">Nivel superado</span>
       <h2 class="h2" id="clearTitle">¡Jefe derrotado!</h2>
       <div class="tally">
-        <div><b id="clearGems">0/0</b><span>Polleras</span></div>
+        <div><b id="clearGems">0/0</b><span>Pantalones</span></div>
         <div><b id="clearTime">0:00</b><span>Tiempo</span></div>
         <div id="totalBox" hidden><b id="clearTotal">0</b><span>Récord total</span></div>
       </div>
@@ -220,7 +220,7 @@ const P={
 };
 
 const LEVELS=[
-  {name:'Nivel 1', intro:'Zorros, pantalones y crudo', boss:'pants', bossName:'Pantalones gigantes'},
+  {name:'Nivel 1', intro:'Zorros, polleras y crudo', boss:'pants', bossName:'Pollera gigante'},
   {name:'Nivel 2', intro:'Llegan el vapor y el viento', boss:'cami', bossName:'Camí'},
   {name:'Nivel 3', intro:'¡Cuidado con los perros!', boss:'dog3', bossName:'Perro de tres cabezas'},
   {name:'Nivel 4', intro:'¡Gatos sueltos!', boss:'cat2', bossName:'Gato de dos cabezas'}
@@ -403,7 +403,7 @@ let camX=0,camY=-300, shake=0;
 const p={x:0,y:0,w:24,h:48,vx:0,vy:0,face:1,onGround:false,coyote:0,buf:0,jumps:0,invul:0,sq:0,spin:0,anim:0,hp:3,gems:0,on:null,bigT:0,scale:1};
 let respawn={x:40,y:0};
 const parts=[], drops=[], proj=[];
-let B=null, bossDone=false, goalRise=0, arenaSnap=null, windNow=0, windToast=false, inArena=false;
+let leitoSay=null, B=null, bossDone=false, goalRise=0, arenaSnap=null, windNow=0, windToast=false, inArena=false;
 const motes=Array.from({length:30},()=>({x:Math.random(),y:Math.random(),ph:Math.random()*6,s:.3+Math.random()*.8}));
 const stars=Array.from({length:50},()=>({x:Math.random(),y:Math.random()*.3,r:Math.random()*1.2+.3,tw:Math.random()*6}));
 layers=[makeLayer('far',11),makeLayer('mid',23),makeLayer('near',37)];
@@ -412,7 +412,7 @@ function loadLevel(n,opts={}){
   lvl=n; L=genLevel(n);
   Object.assign(p,{x:40,y:-60,vx:0,vy:0,face:1,onGround:false,coyote:0,buf:0,jumps:0,invul:0,sq:0,spin:0,hp:3,gems:0,on:null,bigT:0,scale:1,w:24,h:48});
   respawn={x:40,y:0}; parts.length=0; drops.length=0; proj.length=0; lvlTime=0;
-  B=null; bossDone=false; goalRise=0; arenaSnap=null; windToast=false; inArena=false;
+  leitoSay=null; B=null; bossDone=false; goalRise=0; arenaSnap=null; windToast=false; inArena=false;
   if(opts.arena){
     const A=L.arena;
     for(const g of L.gems)if(g.x<A.x0)g.got=true;
@@ -564,22 +564,25 @@ function schedMusic(){
 function duck(on){if(musicGain&&ac)musicGain.gain.setTargetAtTime(on?.18:.55,ac.currentTime,.08)}
 
 /* ---------- Voz de Camí ---------- */
-let voice=null;
+let voice=null, maleVoice=null;
 function pickVoice(){
   try{
     const vs=speechSynthesis.getVoices().filter(v=>/^es/i.test(v.lang));
     const fem=/female|mujer|paulina|m[oó]nica|helena|laura|sabina|luc[ií]a|elvira|dalia|elena|camila|soledad|paloma|marisol|esperanza|isabela|francisca|ximena|valentina|carmen|ines|in[eé]s/i;
+    const mal=/\bmale|hombre|jorge|diego|juan|carlos|pablo|enrique|miguel|andr[eé]s|tom[aá]s|alvaro|álvaro|raul|raúl|google espa/i;
+    maleVoice=vs.find(v=>mal.test(v.name)&&!/female/i.test(v.name)&&!fem.test(v.name))||null;
     voice=vs.find(v=>fem.test(v.name)&&/AR|419|MX|US|CO/i.test(v.lang))||vs.find(v=>fem.test(v.name))||vs.find(v=>/AR|419/.test(v.lang))||vs[0]||null;
   }catch(e){}
 }
 if('speechSynthesis' in window){pickVoice(); try{speechSynthesis.onvoiceschanged=pickVoice}catch(e){}}
 function primeSpeech(){try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}}
-function speak(text){
+function speak(text,male){
   if(muted||!('speechSynthesis' in window))return;
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text.replace(/[¡!¿?]/g,m=>m==='?'?'?':''));
-    u.lang=voice?voice.lang:'es-AR'; if(voice)u.voice=voice; u.pitch=1.35; u.rate=1.05;
+    const vv=male?(maleVoice||voice):voice;
+    u.lang=vv?vv.lang:'es-AR'; if(vv)u.voice=vv; u.pitch=male?(maleVoice?1:.6):1.35; u.rate=male?1:1.05;
     duck(true); u.onend=()=>duck(false); u.onerror=()=>duck(false);
     speechSynthesis.speak(u);
   }catch(e){}
@@ -717,9 +720,9 @@ function update(dt){
   for(const w of L.wisps){
     if(!w.alive)continue;
     w.t+=dt*(1+lvl*.12); w.x=w.x0+Math.sin(w.t*1.3)*w.amp; w.y=w.y0+Math.sin(w.t*2.6)*18;
-    const box={x:w.x-14,y:w.y-18,w:28,h:36};
+    const box={x:w.x-20,y:w.y-17,w:40,h:36};
     if(hit(p,box)){
-      if(big||(p.vy>0&&prevB<=box.y+14)){w.alive=false;if(!big)stompBounce();sfx('stomp');burst(w.x,w.y,18,'#6f9be0',280,.55,4,300,true)}
+      if(big||(p.vy>0&&prevB<=box.y+14)){w.alive=false;if(!big)stompBounce();sfx('stomp');burst(w.x,w.y,18,'#ff7ab6',280,.55,4,300,true)}
       else hurt(w.x);
     }
   }
@@ -734,16 +737,17 @@ function update(dt){
   for(const g of L.gems){
     if(g.got)continue;
     const dx=pcx-g.x, dy=p.y+p.h/2-g.y, r=30*p.scale;
-    if(dx*dx+dy*dy<r*r){g.got=true;p.gems++;sfx('gem');burst(g.x,g.y,12,'#ffb3d6',170,.5,2.8,100,true);updateHud()}
+    if(dx*dx+dy*dy<r*r){g.got=true;p.gems++;sfx('gem');burst(g.x,g.y,12,'#9cc4ff',170,.5,2.8,100,true);updateHud()}
   }
   for(const g of L.golds){
     if(g.got)continue;
     const dx=pcx-g.x, dy=p.y+p.h/2-g.y;
-    if(dx*dx+dy*dy<34*34){g.got=true;p.bigT=10;sfx('gold');burst(g.x,g.y,30,'#ffe27a',260,.8,3.5,200,true);toast('Pollera dorada','¡Leito gigante!')}
+    if(dx*dx+dy*dy<34*34){g.got=true;p.bigT=10;sfx('gold');burst(g.x,g.y,30,'#ffe27a',260,.8,3.5,200,true);toast('Pantalón dorado','¡Leito gigante!')}
   }
   updateDrops(dt,SOL);
   for(const c of L.cps){if(!c.lit&&p.x>c.x){c.lit=true;respawn={x:c.x,y:c.y};sfx('cp');burst(c.x+3,c.y-74,16,P.safety,200,.6,3,200,true)}}
 
+  if(leitoSay){leitoSay.t-=dt;if(leitoSay.t<=0)leitoSay=null}
   updateBoss(dt,prevB);
   updateProj(dt);
 
@@ -766,7 +770,7 @@ function updateDrops(dt,SOL){
     for(const pl of L.plats.concat(L.movers)){if(d.vy>0&&d.x>pl.x&&d.x<pl.x+pl.w&&py<=pl.y-8&&d.y>=pl.y-8){d.y=pl.y-8;d.vy=-Math.abs(d.vy)*.5;d.vx*=.82}}
     if(d.t>.45){
       const dx=p.x+p.w/2-d.x, dy=p.y+p.h/2-d.y, r=32*p.scale;
-      if(dx*dx+dy*dy<r*r){p.gems+=d.v;sfx('gem');burst(d.x,d.y,8,'#ffb3d6',150,.4,2.5,100,true);drops.splice(i,1);updateHud()}
+      if(dx*dx+dy*dy<r*r){p.gems+=d.v;sfx('gem');burst(d.x,d.y,8,'#9cc4ff',150,.4,2.5,100,true);drops.splice(i,1);updateHud()}
     }
   }
 }
@@ -775,7 +779,7 @@ function updateDrops(dt,SOL){
 const PHRASES=['¡No podés jugar!','Tenemos que mirar una peli','¿Salimos a cenar?','¿Vamos de viaje?'];
 function makeBoss(type){
   const A=L.arena;
-  const dims={pants:[120,132,5],cami:[66,130,5],dog3:[150,104,6],cat2:[124,92,6]}[type];
+  const dims={pants:[150,106,5],cami:[66,130,5],dog3:[150,104,6],cat2:[124,92,6]}[type];
   return {type,w:dims[0],h:dims[1],hp:dims[2],max:dims[2],x:A.x1-dims[0]-90,y:A.gy-dims[1],vx:0,vy:0,dir:-1,onGround:true,
     state:'intro',t:1.6,inv:0,count:0,act:0,say:null,anim:0,mouth:0,heads:[0,0,0],dead:0};
 }
@@ -867,7 +871,8 @@ function updateBoss(dt,prevB){
     if(p.vy>0&&prevB<=B.y+24&&B.inv<=0&&B.state!=='intro'){
       B.hp--; B.inv=1; p.vy=-760; p.jumps=1; sfx('bosshit'); shake=10;
       burst(px,B.y,18,'#ffffff',260,.5,3,500,true); updateBossBar();
-      if(B.hp<=0){B.state='dead';B.dead=0;B.say=null;sfx('fanfare');setMusic('level');try{speechSynthesis.cancel()}catch(e){};duck(false)}
+      if(B.hp<=0){B.state='dead';B.dead=0;B.say=null;sfx('fanfare');setMusic('level');try{speechSynthesis.cancel()}catch(e){};duck(false);
+        if(lvl===LEVELS.length-1){leitoSay={text:'¡Ya puedo jugar!',t:3.5};setTimeout(()=>speak('¡Ya puedo jugar!',true),500)}}
     }else if(!(p.vy<0&&p.y+p.h<B.y+20))hurt(bcx());
   }
 }
@@ -1023,12 +1028,12 @@ function drawSkirt(x,y,gold,alpha=1,sc=1){
   ctx.save(); ctx.globalAlpha=alpha; ctx.translate(x,y+bob); ctx.scale(sc,sc);
   ctx.globalCompositeOperation='lighter';
   const r=gold?40:26, gl=ctx.createRadialGradient(0,0,0,0,0,r);
-  gl.addColorStop(0,gold?'rgba(255,215,80,.55)':'rgba(255,95,162,.38)'); gl.addColorStop(1,'rgba(255,95,162,0)');
+  gl.addColorStop(0,gold?'rgba(255,215,80,.55)':'rgba(110,160,255,.42)'); gl.addColorStop(1,'rgba(110,160,255,0)');
   ctx.fillStyle=gl; ctx.fillRect(-r,-r,r*2,r*2);
   if(gold){ctx.fillStyle='#fff6c8';for(let i=0;i<4;i++){const a=time*2+i*Math.PI/2;ctx.beginPath();ctx.arc(Math.cos(a)*22,Math.sin(a)*22,1.8,0,7);ctx.fill()}}
   ctx.globalCompositeOperation='source-over';
-  ctx.scale(Math.max(.3,Math.abs(s)),1);
-  skirtShape(gold);
+  ctx.scale(Math.max(.3,Math.abs(s))*.74,.74); ctx.translate(0,-3);
+  pantsShape(Math.sin(time*5+x)*.08,false,gold);
   ctx.restore();
 }
 
@@ -1115,12 +1120,12 @@ function drawEnemy(e){
   else{ctx.scale(1.15,1.15);catShape(e.vy!==0,e.ph,1,e.cd>1.2)}
   ctx.restore();
 }
-function pantsShape(sw){
-  const dg=ctx.createLinearGradient(0,-18,0,20); dg.addColorStop(0,'#5b8bd6'); dg.addColorStop(1,'#2a4c86');
+function pantsShape(sw,eyes=true,gold=false){
+  const dg=ctx.createLinearGradient(0,-18,0,20); dg.addColorStop(0,gold?'#fff0a0':'#5b8bd6'); dg.addColorStop(1,gold?'#d39a16':'#2a4c86');
   for(const sd of [-1,1]){
     ctx.save(); ctx.translate(sd*6,-6); ctx.rotate(sd*.06+sw*sd);
     ctx.fillStyle=dg; ctx.beginPath(); ctx.moveTo(-6,0); ctx.lineTo(6,0); ctx.lineTo(6.5,24); ctx.lineTo(-5.5,24); ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#24427a'; ctx.fillRect(-5.8,21,12.3,3.5);
+    ctx.fillStyle=gold?'#b37a10':'#24427a'; ctx.fillRect(-5.8,21,12.3,3.5);
     ctx.strokeStyle='rgba(255,190,90,.55)'; ctx.lineWidth=.8; ctx.setLineDash([2,2]); ctx.beginPath(); ctx.moveTo(sd*-4,1); ctx.lineTo(sd*-4,21); ctx.stroke(); ctx.setLineDash([]);
     ctx.restore();
   }
@@ -1128,14 +1133,25 @@ function pantsShape(sw){
   ctx.fillStyle='#3a2414'; ctx.fillRect(-12.5,-18,25,4);
   ctx.fillStyle='#e8c25a'; ctx.fillRect(-3,-18.5,6,5);
   ctx.strokeStyle='rgba(255,190,90,.6)'; ctx.lineWidth=.9; ctx.beginPath(); ctx.moveTo(0,-13); ctx.lineTo(0,-5); ctx.moveTo(-10,-12); ctx.quadraticCurveTo(-6,-8,-4,-13); ctx.moveTo(10,-12); ctx.quadraticCurveTo(6,-8,4,-13); ctx.stroke();
+  if(!eyes){ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(-10,-15,3,9);return}
   ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(-5,-9.5,3,3.2,0,0,7); ctx.ellipse(5,-9.5,3,3.2,0,0,7); ctx.fill();
   ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(-4.5,-9,1.5,0,7); ctx.arc(5.5,-9,1.5,0,7); ctx.fill();
   ctx.strokeStyle='#111'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(-8.5,-14); ctx.lineTo(-2.5,-12); ctx.moveTo(8.5,-14); ctx.lineTo(2.5,-12); ctx.stroke();
 }
+function angrySkirt(sw){
+  ctx.save(); ctx.rotate(sw);
+  skirtShape(false);
+  const fl=Math.sin(time*10)*1.2;
+  ctx.fillStyle='#ff4f97'; ctx.beginPath(); for(let i=0;i<6;i++){const x1=14-i*28/6;ctx.moveTo(x1,9);ctx.quadraticCurveTo(x1-2.3,14+fl,x1-4.66,9)} ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(-4.2,0,2.6,2.8,0,0,7); ctx.ellipse(4.2,0,2.6,2.8,0,0,7); ctx.fill();
+  ctx.fillStyle='#111'; ctx.beginPath(); ctx.arc(-3.8,.5,1.3,0,7); ctx.arc(4.6,.5,1.3,0,7); ctx.fill();
+  ctx.strokeStyle='#111'; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(-7.5,-4); ctx.lineTo(-2,-2.4); ctx.moveTo(7.5,-4); ctx.lineTo(2,-2.4); ctx.stroke();
+  ctx.restore();
+}
 function drawPants(w){
   ctx.save(); ctx.translate(w.x,w.y);
-  ctx.fillStyle='rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0,40,14,3,0,0,7); ctx.fill();
-  pantsShape(Math.sin(time*9+w.x*.01)*.22);
+  ctx.fillStyle='rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0,40,16,3,0,0,7); ctx.fill();
+  ctx.scale(1.7,1.7); angrySkirt(Math.sin(time*6+w.x*.01)*.12);
   ctx.restore();
 }
 function drawSpill(s){
@@ -1371,10 +1387,11 @@ function drawBoss(){
   ctx.fillStyle='rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(cx,L.arena.gy,B.w*.45,7,0,0,7); ctx.fill();
   ctx.translate(cx,by);
   if(B.type==='pants'){
-    const s=B.h/44, squash=B.state==='crouch'?.88:1;
-    ctx.scale(s*(2-squash),s*squash); ctx.translate(0,-24.5);
-    pantsShape(B.onGround?Math.sin(time*8)*.2:.35);
-    ctx.fillStyle='#e8c25a'; ctx.beginPath(); ctx.moveTo(-9,-19); ctx.lineTo(-6,-27); ctx.lineTo(-2,-21); ctx.lineTo(0,-29); ctx.lineTo(2,-21); ctx.lineTo(6,-27); ctx.lineTo(9,-19); ctx.closePath(); ctx.fill();
+    const s=B.h/25, squash=B.state==='crouch'?.88:1;
+    ctx.scale(s*(2-squash),s*squash); ctx.translate(0,-14);
+    angrySkirt(B.onGround?Math.sin(time*7)*.05:-.12*B.dir);
+    ctx.fillStyle='#ffd54a'; ctx.beginPath(); ctx.moveTo(-6,-10); ctx.lineTo(-4.5,-15); ctx.lineTo(-2,-11.5); ctx.lineTo(0,-16); ctx.lineTo(2,-11.5); ctx.lineTo(4.5,-15); ctx.lineTo(6,-10); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#ff4f97'; ctx.beginPath(); ctx.arc(0,-13.4,.9,0,7); ctx.fill();
   }else if(B.type==='cami'){
     const s=B.h/84; ctx.scale(s,s);
     const moving=Math.abs(B.vx)>10, run=moving?Math.sin(B.anim*14):0;
@@ -1500,6 +1517,7 @@ function render(dt){
   drawBoss();
   for(const q of proj)drawProj(q);
   if(state!=='title')drawPlayer();
+  if(leitoSay&&state!=='title')drawBubble(p.x+p.w/2,p.y-12,leitoSay.text);
 
   for(const q of parts){
     ctx.globalAlpha=Math.max(0,q.life/q.max);
@@ -1542,7 +1560,7 @@ const screens=['#scrTitle','#scrPause','#scrClear','#scrOver'];
 function show(id){screens.forEach(s=>$(s).hidden=s!==id);$('#pads').hidden=!!id}
 const fmt=t=>{t=Math.floor(t);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
 function renderChips(){
-  $('#chips').innerHTML=LEVELS.map((Lv,i)=>`<button class="chip" id="chip${i}" data-l="${i}" ${i>save.unlocked?'disabled':''}><b>${Lv.name}</b><span>Jefe: ${i>save.unlocked?'???':Lv.bossName}</span>${save.best[i]?`<span class="best">Récord: ${save.best[i]} polleras</span>`:''}</button>`).join('');
+  $('#chips').innerHTML=LEVELS.map((Lv,i)=>`<button class="chip" id="chip${i}" data-l="${i}" ${i>save.unlocked?'disabled':''}><b>${Lv.name}</b><span>Jefe: ${i>save.unlocked?'???':Lv.bossName}</span>${save.best[i]?`<span class="best">Récord: ${save.best[i]} pantalones</span>`:''}</button>`).join('');
   $('#chips').querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{if(!b.disabled){initAudio();primeSpeech();start(+b.dataset.l)}}));
 }
 function start(n,opts){
@@ -1569,7 +1587,7 @@ function levelClear(){
 }
 function gameOver(){
   state='over'; setMusic(null); try{speechSynthesis.cancel()}catch(e){}
-  $('#overText').textContent=arenaSnap?'Volvés a la entrada de la arena con las polleras que tenías al llegar.':'Probá otra vez desde el principio del nivel.';
+  $('#overText').textContent=arenaSnap?'Volvés a la entrada de la arena con los pantalones que tenías al llegar.':'Probá otra vez desde el principio del nivel.';
   $('#retryBtn').textContent=arenaSnap?'Reintentar contra el jefe':'Reintentar';
   show('#scrOver');
 }
